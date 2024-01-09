@@ -96,7 +96,7 @@ const CompanionForm = ({ initalData, categories }: CompanionForm) => {
         await axios.patch(`/api/companion/${initalData.id}`, values);
       } else {
         // create companion
-        await axios.post("/api/comapnion", values);
+        await axios.post("/api/companion", values);
       }
       toast({
         description: "Success",
