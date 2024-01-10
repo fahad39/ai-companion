@@ -21,6 +21,10 @@ const ChatMessages = ({
         role="system"
         content={`Hello , I am ${companion.name}, ${companion.description}`}
       />
+      <ChatMessage
+        role="user"
+        content={`Hello , I am ${companion.name}, ${companion.description}`}
+      />
     </div>
   );
 };
