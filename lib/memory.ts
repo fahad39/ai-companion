@@ -102,4 +102,26 @@ export class MemoryManager {
     const recentChats = result.reverse().join("\n");
     return recentChats;
   }
+  /**
+   *  seedChatHistory
+   */
+  public async seedChatHistory(
+    seedContent: String,
+    delimiter: string = "\n",
+    companionKey: CompanionKey
+  ) {
+    const key = this.generateRedisCompanionKey(companionKey);
+    if (await this.history.exists(key)) {
+      console.log("User already has a chat history");
+      return;
+    }
+
+    const content = seedContent.split(delimiter);
+    let counter = 0;
+
+    for (const line of content) {
+      await this.history.zadd(key, { score: counter, member: line });
+      counter += 1;
+    }
+  }
 }
