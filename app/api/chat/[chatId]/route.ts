@@ -52,7 +52,7 @@ export async function POST(
     const companion_file_name = name + ".txt";
 
     const companionKey = {
-      comapanionName: name,
+      companionName: name!,
       userId: user.id,
       modelName: "llama2-13b",
     };
