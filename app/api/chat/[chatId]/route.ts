@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { MemoryManager } from "@/lib/memory";
 import { rateLimit } from "@/lib/rate-limit";
 import prismadb from "@/lib/prismadb";
+import { error } from "console";
 
 export async function POST(
   request: Request,
@@ -65,6 +66,50 @@ export async function POST(
     }
 
     await memoryManager.writeToHistory("user: " + prompt + "\n", companionKey);
+    const recentChatHistory = await memoryManager.readLatestHistory(
+      companionKey
+    );
+    const similarDocs = await memoryManager.VectorSearch(
+      recentChatHistory,
+      companion_file_name
+    );
+
+    let relevantHistory = "";
+
+    if (!!similarDocs && similarDocs.length !== 0) {
+      relevantHistory = similarDocs.map((doc) => doc.pageContent).join("\n");
+    }
+
+    const { handlers } = LangChainStream();
+
+    const model = new Replicate({
+      model:
+        "a16z-infra/llama-2-13b-chat:df7690f1994d94e96ad9d568eac121aecf50684a0b0963b25a41cc40061269e5",
+      input: {
+        max_length: 2048,
+      },
+      apiKey: process.env.REPLICATE_API_TOKEN,
+      callbackManager: CallbackManager.fromHandlers(handlers),
+    });
+
+    model.verbose = true;
+
+    const resp = String(
+      await model
+        .call(
+          `ONLY generate plain sentences without prefix of who is speaking.DO NOT use ${name} : prefix.
+        
+        ${companion.instructions}
+
+        Below are relevant details about ${companion.name}'s past and the conversation you are in.
+        ${relevantHistory}
+
+
+        ${recentChatHistory}\n${companion.name}:
+        `
+        )
+        .catch(console.error)
+    );
   } catch (error) {
     console.log("[CHAT_POST]", error);
     return new NextResponse("Internal Error", { status: 500 });
