@@ -1,7 +1,7 @@
 import { Redis } from "@upstash/redis";
-import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { OpenAIEmbeddings } from "@langchain/openai";
 import { Pinecone } from "@pinecone-database/pinecone";
-import { PineconeStore } from "langchain/vectorstores/pinecone";
+import { PineconeStore } from "@langchain/community/vectorstores/pinecone";
 
 export type CompanionKey = {
   companionName: string;
@@ -16,7 +16,10 @@ export class MemoryManager {
 
   public constructor() {
     this.history = Redis.fromEnv();
-    this.verctorDBClient = new Pinecone();
+    this.verctorDBClient = new Pinecone({
+      apiKey: process.env.PINECONE_API_KEY!,
+      environment: process.env.PINECONE_ENVIROMENT!,
+    });
   }
 
   public async init() {
