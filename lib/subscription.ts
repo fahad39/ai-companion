@@ -21,7 +21,6 @@ export const checkSubscription = async () => {
       stripeSubscriptionId: true,
     },
   });
-
   if (!userSubscription) {
     return false;
   }

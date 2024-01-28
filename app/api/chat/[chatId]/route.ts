@@ -1,14 +1,12 @@
 import { StreamingTextResponse, LangChainStream } from "ai";
 import { auth, currentUser } from "@clerk/nextjs";
-import { CallbackManager } from "@langchain/core/callbacks/manager";
-import { Replicate } from "@langchain/community/llms/replicate";
+import { Replicate } from "langchain/llms/replicate";
+import { CallbackManager } from "langchain/callbacks";
 import { NextResponse } from "next/server";
 
 import { MemoryManager } from "@/lib/memory";
 import { rateLimit } from "@/lib/rate-limit";
 import prismadb from "@/lib/prismadb";
-import { error } from "console";
-
 export async function POST(
   request: Request,
   { params }: { params: { chatId: string } }
@@ -76,7 +74,9 @@ export async function POST(
     let relevantHistory = "";
 
     if (!!similarDocs && similarDocs.length !== 0) {
-      relevantHistory = similarDocs.map((doc) => doc.pageContent).join("\n");
+      relevantHistory = similarDocs
+        .map((doc: { pageContent: any }) => doc.pageContent)
+        .join("\n");
     }
 
     const { handlers } = LangChainStream();
